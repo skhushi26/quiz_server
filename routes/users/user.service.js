@@ -8,14 +8,13 @@ exports.userRegistration = async (req, res) => {
   try {
     const { first_name, last_name, email, username, password, mobile_no } =
       req.body;
-    const isUsernameExists = await UserModel.findOne({ username: username });
-    if (!isUsernameExists) {
+    const isEmailExists = await UserModel.findOne({ email: email });
+    if (!isEmailExists) {
       const hash = await bcrypt.hash(password, 10);
       const userData = await UserModel.create({
         first_name,
         last_name,
         email,
-        username,
         password: hash,
         mobile_no,
       });
@@ -23,7 +22,7 @@ exports.userRegistration = async (req, res) => {
       delete newUserData.password;
       response(res, null, newUserData, "User registered successfully", 200);
     } else {
-      response(res, null, null, "This username already exists", 400);
+      response(res, null, null, "This user already exists", 400);
     }
   } catch (error) {
     response(res, null, error, "Something went wrong in registration!!", 500);
