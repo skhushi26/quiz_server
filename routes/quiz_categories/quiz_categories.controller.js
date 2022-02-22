@@ -1,0 +1,46 @@
+const express = require("express");
+const authorize = require("../../helpers/authorize");
+
+const quizCategoryService = require("./quiz_categories.service");
+const {
+  addQuizCategorySchema,
+  updateQuizCategorySchema,
+} = require("./quiz_categories.validation");
+
+const router = express.Router();
+
+router.post(
+  "/add",
+  authorize("admin"),
+  addQuizCategorySchema,
+  quizCategoryService.addQuizCategory
+);
+
+router.patch(
+  "/update/:id",
+  authorize("admin"),
+  updateQuizCategorySchema,
+  quizCategoryService.updateQuizCategory
+);
+
+router.patch(
+  "/delete/:id",
+  authorize("admin"),
+  quizCategoryService.deleteQuizCategory
+);
+
+router.get(
+  "/get-all",
+  authorize(["admin", "user"]),
+  quizCategoryService.getAllQuizCategories
+);
+
+router.patch(
+  "/submit/:id",
+  authorize("admin"),
+  quizCategoryService.submitCategory
+);
+
+router.get("/get-one/:id", authorize("admin"), quizCategoryService.getById);
+
+module.exports = router;
