@@ -188,9 +188,25 @@ exports.getQuestionByCategory = async (req, res) => {
 
 exports.getSubmittedQuizCategory = async (req, res) => {
   try {
-    const submittedQuizCategoryData = await quizCategoryModel.find({
+    const resData = await quizCategoryModel.find({
       status: "submitted",
     });
+    const submittedQuizCategoryData = JSON.parse(JSON.stringify(resData));
+    for (let submitCategory of submittedQuizCategoryData) {
+      const quizResultData = await QuizResultModel.findOne({
+        category_id: submitCategory._id,
+        user_id: req.user.user_id,
+      });
+
+      if (quizResultData != null) {
+        submitCategory["is_quiz_given"] = true;
+        submitCategory["total_score"] = quizResultData.total_score;
+      } else {
+        submitCategory["is_quiz_given"] = false;
+        submitCategory["total_score"] = 0;
+      }
+    }
+
     response(
       res,
       null,
@@ -201,4 +217,8 @@ exports.getSubmittedQuizCategory = async (req, res) => {
   } catch (error) {
     response(res, error, null, "Something went wrong!!", 500);
   }
+};
+
+const bindScoreWithQuize = () => {
+  return new Promise(async (resolve, reject) => {});
 };
