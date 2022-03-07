@@ -5,6 +5,8 @@ const cors = require("cors");
 const errorHandler = require("./helpers/error-handler");
 const userRoutes = require("./routes/users/user.controller");
 const quizCategoryRoutes = require("./routes/quiz_categories/quiz_categories.controller");
+const questionRoutes = require("./routes/questions/questions.controller");
+const quizResultRoutes = require("./routes/quiz_results/quiz_results.controller");
 
 const app = express();
 
@@ -15,6 +17,8 @@ app.use(express.json());
 
 app.use("/user", userRoutes);
 app.use("/quiz-category", quizCategoryRoutes);
+app.use("/question", questionRoutes);
+app.use("/quiz-result", quizResultRoutes);
 
 app.use(errorHandler);
 

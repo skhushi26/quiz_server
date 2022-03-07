@@ -43,4 +43,16 @@ router.patch(
 
 router.get("/get-one/:id", authorize("admin"), quizCategoryService.getById);
 
+router.get(
+  "/get-question-by-category/:id",
+  authorize(["admin", "user"]),
+  quizCategoryService.getQuestionByCategory
+);
+
+router.get(
+  "/get-submitted",
+  authorize("user"),
+  quizCategoryService.getSubmittedQuizCategory
+);
+
 module.exports = router;

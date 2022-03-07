@@ -1,5 +1,9 @@
+const mongoose = require("mongoose");
+
 const quizCategoryModel = require("./quiz_categories.model");
 const response = require("../../helpers/response");
+const questionsModel = require("../questions/questions.model");
+const QuizResultModel = require("../quiz_results/quiz_results.model");
 
 exports.addQuizCategory = async (req, res) => {
   try {
@@ -60,6 +64,12 @@ exports.deleteQuizCategory = async (req, res) => {
     if (isQuizCategoryExists) {
       const deleteQuizCategory = await quizCategoryModel.findOneAndUpdate(
         { _id },
+        { is_deleted: true }
+      );
+      const deleteQuestions = await questionsModel.updateMany(
+        {
+          category_id: isQuizCategoryExists._id,
+        },
         { is_deleted: true }
       );
       response(
@@ -126,6 +136,66 @@ exports.getById = async (req, res) => {
       null,
       categoryData,
       "Category Details found successfully",
+      200
+    );
+  } catch (error) {
+    response(res, error, null, "Something went wrong!!", 500);
+  }
+};
+
+exports.getQuestionByCategory = async (req, res) => {
+  try {
+    const quizResultData = await QuizResultModel.findOne({
+      user_id: mongoose.Types.ObjectId(req.user.user_id),
+      category_id: req.params.id,
+    });
+    const data = await quizCategoryModel.aggregate([
+      { $match: { _id: mongoose.Types.ObjectId(req.params.id) } },
+      {
+        $lookup: {
+          from: "questions",
+          localField: "_id",
+          foreignField: "category_id",
+          as: "questions",
+        },
+      },
+    ]);
+
+    data[0].questions = data[0].questions.filter(
+      (question) => question.is_deleted === false
+    );
+    data[0].is_quiz_given = true;
+    if (!quizResultData) {
+      data[0].questions.map((que) => {
+        que.options.map((opt) => {
+          delete opt.is_correct;
+        });
+      });
+      data[0].is_quiz_given = false;
+    }
+
+    response(
+      res,
+      null,
+      data,
+      "Quiz data with questions found successfully",
+      200
+    );
+  } catch (error) {
+    response(res, error, null, "Something went wrong!!", 500);
+  }
+};
+
+exports.getSubmittedQuizCategory = async (req, res) => {
+  try {
+    const submittedQuizCategoryData = await quizCategoryModel.find({
+      status: "submitted",
+    });
+    response(
+      res,
+      null,
+      submittedQuizCategoryData,
+      "Submitted quiz categories found successfully",
       200
     );
   } catch (error) {
