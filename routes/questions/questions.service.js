@@ -56,8 +56,8 @@ exports.addQuestionDetails = async (req, res) => {
           status: status,
         });
       }
-      response(res, null, questionData, "Questions added successfully", 200);
     });
+    response(res, null, true, "Questions added successfully", 200);
   } catch (error) {
     response(res, error, null, "Something went wrong!!", 500);
   }
