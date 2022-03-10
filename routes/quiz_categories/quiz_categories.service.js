@@ -8,7 +8,10 @@ const QuizResultModel = require("../quiz_results/quiz_results.model");
 exports.addQuizCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
-    const isCategoryExists = await quizCategoryModel.findOne({ name: name });
+    const isCategoryExists = await quizCategoryModel.findOne({
+      name: name,
+      is_deleted: false,
+    });
     if (!isCategoryExists) {
       const quizCategoryData = await quizCategoryModel.create({
         name,
@@ -165,7 +168,7 @@ exports.getQuestionByCategory = async (req, res) => {
       (question) => question.is_deleted === false
     );
     data[0].is_quiz_given = true;
-    if (!quizResultData) {
+    if (!quizResultData && req.user.role === "user") {
       data[0].questions.map((que) => {
         que.options.map((opt) => {
           delete opt.is_correct;
